@@ -9,16 +9,16 @@ body {
     flex-direction: column;
     align-items: center;
     min-height: 100%;
-    padding-top: 40px;
+    padding-top: 15px;
     background: #f4f2ee;
 
 }
 
 #tree-area {
-    position: relative;
+    position: center;
     width: 1320px;
-    max-width: 100%;
-    height: 580px;
+    max-width: 80%;
+    height: 330px;
     overflow: auto;
     background: #1c1c1e;
 }
@@ -84,7 +84,7 @@ body {
 
 #morse-key {
     width: 1320px;
-    max-width: 100%;
+    max-width: 80%;
     margin-top: 24px;
     background: #1c1c1e;
     border: 1px solid #444 ;
