@@ -42,6 +42,6 @@ function layoutTree(node, xMin, xMax, level, dy, nodes, lines, parentX, parentY)
     nodes.push({x, y, letter: node.letter});
     lines.push({x1: parentX, y1: parentY, x2: x, y2: y});
 
-    layoutTree(node.dot, xMax, x, level + 1, dy, nodes, lines, x, y);
-    layoutTree(node.dash, x, xMin, level + 1, dy, nodes, lines, x, y);
+    layoutTree(node.dot, xMin, x, level + 1, dy, nodes, lines, x, y);
+    layoutTree(node.dash, x, xMax, level + 1, dy, nodes, lines, x, y);
 }
