@@ -38,8 +38,8 @@ const morseTree = {
 const treeNodes = []; // {x, y, letter} for every letter
 const treeLines = []; // {x1, y1, x2, y2, type} for every connecting segment
 
-const COL_SPACING = 48; // horizontal dist. 
-const ROW_SPACING = 55; // vertical dista.when a branch drops down
+const COL_SPACING = 66; // horizontal dist. 
+const ROW_SPACING = 76; // vertical dista.when a branch drops down
 
 function buildOrthogonalLayout(node, x, y, side) {
     if (!node) {
@@ -114,9 +114,9 @@ function drawTree() {
     treeNodes.length = 0;
     treeLines.length = 0;
 
-    const rootX = 480;
-    const rootY = 20;
-    const spineY = rootY + 45; // E and T sit diagonal
+    const rootX = 660;
+    const rootY = 30;
+    const spineY = rootY + 55; // E and T sit diagonal
 
     const eX = rootX + COL_SPACING;
     const tX = rootX - COL_SPACING;
