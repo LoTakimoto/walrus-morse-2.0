@@ -31,39 +31,47 @@ const morseTree = {
   }
 };
 
-// Walks the tree and calculates x or y positions for every node + the lines connecting each node to its parent
+// --------
 
-// we walk through the tree one branch at a time. Everytime we go one level deeper, we SPLIT the horizontal space we have in HALF
-// dot child: left half; dash child: right half ---> this spreads the letters into a tree shape 
+// each half of the tree has ONE symbol that keeps a straight line going in a 'spine', and the OTHER symbol drops down at a right angle to start a new spine.
 
+const treeNodes = []; // {x, y, letter} for every letter
+const treeLines = []; // {x1, y1, x2, y2, type} for every connecting segment
 
-const treeNodes = []; //hold {x, y, letter} for every LETTER
-const treeLines = []; // hold {x1, y1, x2, y2} for every connecting line
+const COL_SPACING = 48; // horizontal dist. 
+const ROW_SPACING = 55; // vertical dista.when a branch drops down
 
-function findNodePositions(node, leftEdge, rightEdge, level, parentX, parentY) {
+function buildOrthogonalLayout(node, x, y, side) {
     if (!node) {
-    return;
-}
- 
-    //if -> branch doesnt lead to a letter -> null
-    
+        return; // no letter down this path
+    }
 
-    const rowHeight = 75;
-    const nodeX = (leftEdge + rightEdge) / 2;
-    const nodeY = level * rowHeight + 30;
+    treeNodes.push({ x: x, y: y, letter: node.letter });
 
-    treeNodes.push({x: nodeX, y: nodeY, letter: node.letter});
-    treeLines.push({x1: parentX, y1: parentY, x2: nodeX, y2: nodeY});
+    const horizontalSymbol = side === 'right' ? 'dot' : 'dash';
+    const verticalSymbol = side === 'right' ? 'dash' : 'dot';
+    const horizontalSign = side === 'right' ? 1 : -1;
 
-    // dot child gets the left half
-    findNodePositions(node.dot, leftEdge, nodeX, level + 1, nodeX, nodeY);
-    // dash child gets the right half
-    findNodePositions(node.dash, nodeX, rightEdge, level + 1, nodeX, nodeY);
+    const horizontalChild = node[horizontalSymbol];
+    const verticalChild = node[verticalSymbol];
+
+    if (horizontalChild) {
+        const childX = x + horizontalSign * COL_SPACING;
+        const childY = y;
+        treeLines.push({ x1: x, y1: y, x2: childX, y2: childY, type: horizontalSymbol });
+        buildOrthogonalLayout(horizontalChild, childX, childY, side);
+    }
+
+    if (verticalChild) {
+        const childX = x;
+        const childY = y + ROW_SPACING;
+        treeLines.push({ x1: x, y1: y, x2: childX, y2: childY, type: verticalSymbol });
+        buildOrthogonalLayout(verticalChild, childX, childY, side);
+    }
 }
 
 // --------
 // TURNING ALL THOSE POSITIONS INTO ACTUAL ELEMENTS on the page
-// instead of drawing -->> small <div> for every letter and connecting line and position with css manually
 
 function createLineElement(x1, y1, x2, y2) {
     const deltaX = x2 - x1;
@@ -77,35 +85,65 @@ function createLineElement(x1, y1, x2, y2) {
     lineElement.style.top = y1 + 'px';
     lineElement.style.width = length + 'px';
     lineElement.style.transform = 'rotate(' + angleInDegrees + 'deg)';
-    
+
     return lineElement;
+}
+
+// the peg in the middle of a connection
+
+function createPegElement(x1, y1, x2, y2, type) {
+    const deltaX = x2 - x1;
+    const deltaY = y2 - y1;
+    const angleInDegrees = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2;
+
+    const pegElement = document.createElement('div');
+    pegElement.className = type === 'dash' ? 'tree-peg tree-peg-dash' : 'tree-peg tree-peg-dot';
+    pegElement.style.left = midX + 'px';
+    pegElement.style.top = midY + 'px';
+    pegElement.style.transform = 'translate(-50%, -50%) rotate(' + angleInDegrees + 'deg)';
+
+    return pegElement;
 }
 
 function drawTree() {
     const treeArea = document.getElementById('tree-area');
-    treeArea.innerHTML = ''; 
-    //clears anything drawn before
+    treeArea.innerHTML = '';
 
-    const imageWidth = 800;
-    const imageHeight = 340;
-    const rootX = imageWidth / 2;
-    const rootY = 15;
-
-    //start fresh
     treeNodes.length = 0;
     treeLines.length = 0;
 
-    findNodePositions(morseTree.dot, 0, imageWidth / 2, 1, rootX, rootY);
-    findNodePositions(morseTree.dash, imageWidth / 2, imageWidth, 1, rootX, rootY);
+    const rootX = 480;
+    const rootY = 20;
+    const spineY = rootY + 45; // E and T sit diagonal
 
-    //draw the CONNECTING LINES first
+    const eX = rootX + COL_SPACING;
+    const tX = rootX - COL_SPACING;
+
+    
+    // funnel shape at the top
+    treeLines.push({ x1: rootX, y1: rootY, x2: eX, y2: spineY, type: 'dot' });
+    treeLines.push({ x1: rootX, y1: rootY, x2: tX, y2: spineY, type: 'dash' });
+
+    buildOrthogonalLayout(morseTree.dot, eX, spineY, 'right');
+    buildOrthogonalLayout(morseTree.dash, tX, spineY, 'left');
+
+    // connecting lines firstr
     for (let i = 0; i < treeLines.length; i++) {
         const line = treeLines[i];
         const lineElement = createLineElement(line.x1, line.y1, line.x2, line.y2);
         treeArea.appendChild(lineElement);
     }
 
-    // circle marking the start of the tree
+    // pegs on top --- marking dot vs dash for each connection
+    for (let i = 0; i < treeLines.length; i++) {
+        const line = treeLines[i];
+        const pegElement = createPegElement(line.x1, line.y1, line.x2, line.y2, line.type);
+        treeArea.appendChild(pegElement);
+    }
+
+    //  marker for the tart of the tree
     const rootMarker = document.createElement('div');
     rootMarker.className = 'tree-root-marker';
     rootMarker.style.left = rootX + 'px';
@@ -116,7 +154,7 @@ function drawTree() {
     for (let i = 0; i < treeNodes.length; i++) {
         const node = treeNodes[i];
         const nodeElement = document.createElement('div');
-        
+
         nodeElement.className = 'tree-node';
         nodeElement.style.left = node.x + 'px';
         nodeElement.style.top = node.y + 'px';
@@ -125,14 +163,14 @@ function drawTree() {
     }
 }
 
-drawTree()
+drawTree();
 
 //---------
 // keyboard
 // dot = short press / dash = long press (a "hold")
 // we dont know which one it is when the finger/mouse goes down ->>> we only find out once it comes back UP, by checking how much TIME passed in between
 
-const DASH_THRESHOLD_MS = 200; 
+const DASH_THRESHOLD_MS = 200;
 // holds shorter than this = dot / longer = dash
 
 let pressStartTime = null;
@@ -189,4 +227,3 @@ morseKeyButton.addEventListener('pointerleave', handlePressEnd);
 
 document.getElementById('btn-backspace').addEventListener('click', backspaceSequence);
 document.getElementById('btn-clear').addEventListener('click', clearSequence);
- 
