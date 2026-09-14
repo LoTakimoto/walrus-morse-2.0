@@ -1,6 +1,6 @@
 // morse decoding tree
-// EACH NODE has a latter and TWO possible children (dot, dash)
-// null means that path doesnt lead to a standart english letter
+// EACH NODE has a letter and TWO possible children (dot, dash)
+// null means that path doesnt lead to a letter
 
 const morseTree = {
   dot: { // E
@@ -30,3 +30,18 @@ const morseTree = {
     }
   }
 };
+
+// Walks the tree and calculates x or y positions for every node + the lines connecting each node to its parent
+
+function layoutTree(node, xMin, xMax, level, dy, nodes, lines, parentX, parentY) {
+    if (!node) return;
+
+    const x = (xMin + xMax) / 2;
+    const y = level * dy + 30;
+
+    nodes.push({x, y, letter: node.letter});
+    lines.push({x1: parentX, y1: parentY, x2: x, y2: y});
+
+    layoutTree(node.dot, xMax, x, level + 1, dy, nodes, lines, x, y);
+    layoutTree(node.dash, x, xMin, level + 1, dy, nodes, lines, x, y);
+}
