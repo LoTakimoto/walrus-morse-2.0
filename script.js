@@ -33,15 +33,96 @@ const morseTree = {
 
 // Walks the tree and calculates x or y positions for every node + the lines connecting each node to its parent
 
-function layoutTree(node, xMin, xMax, level, dy, nodes, lines, parentX, parentY) {
-    if (!node) return;
+// we walk through the tree one branch at a time. Everytime we go one level deeper, we SPLIT the horizontal space we have in HALF
+// dot child: left half; dash child: right half ---> this spreads the letters into a tree shape 
 
-    const x = (xMin + xMax) / 2;
-    const y = level * dy + 30;
 
-    nodes.push({x, y, letter: node.letter});
-    lines.push({x1: parentX, y1: parentY, x2: x, y2: y});
+const treeNodes = []; //hold {x, y, letter} for every LETTER
+const treeLines = []; // hold {x1, y1, x2, y2} for every connecting line
 
-    layoutTree(node.dot, xMin, x, level + 1, dy, nodes, lines, x, y);
-    layoutTree(node.dash, x, xMax, level + 1, dy, nodes, lines, x, y);
+function findNodePositions(node, leftEdge, rightEdge, level, parentX, parentY) {
+    if (!node) {
+    return;
 }
+ 
+    //if -> branch doesnt lead to a letter -> null
+    
+
+    const rowHeight = 75;
+    const nodeX = (leftEdge + rightEdge) / 2;
+    const nodeY = level * rowHeight + 30;
+
+    treeNodes.push({x: nodeX, y: nodeY, letter: node.letter});
+    treeLines.push({x1: parentX, y1: parentY, x2: nodeX, y2: nodeY});
+
+    // dot child gets the left half
+    findNodePositions(node.dot, leftEdge, nodeX, level + 1, nodeX, nodeY);
+    // dash child gets the right half
+    findNodePositions(node.dash, nodeX, rightEdge, level + 1, nodeX, nodeY);
+}
+
+// --------
+// TURNING ALL THOSE POSITIONS INTO ACTUAL ELEMENTS on the page
+// instead of drawing -->> small <div> for every letter and connecting line and position with css manually
+
+function createLineElement(x1, y1, x2, y2) {
+    const deltaX = x2 - x1;
+    const deltaY = y2 - y1;
+    const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const angleInDegrees = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+    const lineElement = document.createElement('div');
+    lineElement.className = 'tree-line';
+    lineElement.style.left = x1 + 'px';
+    lineElement.style.top = y1 + 'px';
+    lineElement.style.width = length + 'px';
+    lineElement.style.transform = 'rotate(' + angleInDegrees + 'deg)';
+    
+    return lineElement;
+}
+
+function drawTree() {
+    const treeArea = document.getElementById('tree-area');
+    treeArea.innerHTML = ''; 
+    //clears anything drawn before
+
+    const imageWidth = 800;
+    const imageHeight = 340;
+    const rootX = imageWidth / 2;
+    const rootY = 15;
+
+    //start fresh
+    treeNodes.length = 0;
+    treeLines.length = 0;
+
+    findNodePositions(morseTree.dot, 0, imageWidth / 2, 1, rootX, rootY);
+    findNodePositions(morseTree.dash, imageWidth / 2, imageWidth, 1, rootX, rootY);
+
+    //draw the CONNECTING LINES first
+    for (let i = 0; i < treeLines.length; i++) {
+        const line = treeLines[i];
+        const lineElement = createLineElement(line.x1, line.y1, line.x2, line.y2);
+        treeArea.appendChild(lineElement);
+    }
+
+    // circle marking the start of the tree
+    const rootMarker = document.createElement('div');
+    rootMarker.className = 'tree-root-marker';
+    rootMarker.style.left = rootX + 'px';
+    rootMarker.style.top = rootY + 'px';
+    treeArea.appendChild(rootMarker);
+
+    // draw every letter as a circle with the letter written inside it
+    for (let i = 0; i < treeNodes.length; i++) {
+        const node = treeNodes[i];
+        const nodeElement = document.createElement('div');
+        
+        nodeElement.className = 'tree-node';
+        nodeElement.style.left = node.x + 'px';
+        nodeElement.style.top = node.y + 'px';
+        nodeElement.textContent = node.letter;
+        treeArea.appendChild(nodeElement);
+    }
+}
+
+drawTree()
