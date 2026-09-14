@@ -126,3 +126,67 @@ function drawTree() {
 }
 
 drawTree()
+
+//---------
+// keyboard
+// dot = short press / dash = long press (a "hold")
+// we dont know which one it is when the finger/mouse goes down ->>> we only find out once it comes back UP, by checking how much TIME passed in between
+
+const DASH_THRESHOLD_MS = 200; 
+// holds shorter than this = dot / longer = dash
+
+let pressStartTime = null;
+let currentSequence = [];
+
+const morseKeyButton = document.getElementById('morse-key');
+const translationBar = document.getElementById('translation-bar');
+
+function handlePressStart() {
+    pressStartTime = Date.now();
+}
+
+function handlePressEnd() {
+    if (pressStartTime === null) {
+        return;
+    }
+
+    const pressDuration = Date.now() - pressStartTime;
+    pressStartTime = null;
+    //reset for the next press
+
+    const signal = pressDuration < DASH_THRESHOLD_MS ? 'dot' : 'dash';
+    currentSequence.push(signal);
+
+    updateTranslationBar();
+}
+
+function updateTranslationBar() {
+    const symbols = currentSequence.map(function (signal) {
+        return signal === 'dot' ? '.' : '-';
+    });
+    translationBar.textContent = symbols.join(' ');
+    // shows the sequence as . and - symbols
+}
+
+function clearSequence() {
+    currentSequence = [];
+    updateTranslationBar();
+}
+
+function backspaceSequence() {
+    currentSequence.pop();
+    //removes the last entry (if any)
+    updateTranslationBar();
+}
+
+morseKeyButton.addEventListener('pointerdown', handlePressStart);
+morseKeyButton.addEventListener('pointerup', handlePressEnd);
+
+//--
+
+//if the pointer is released outside the button or leaves while held, treat it the same as releasing (so it doesnt get stuck mid press)
+morseKeyButton.addEventListener('pointerleave', handlePressEnd);
+
+document.getElementById('btn-backspace').addEventListener('click', backspaceSequence);
+document.getElementById('btn-clear').addEventListener('click', clearSequence);
+ 
