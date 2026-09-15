@@ -94,10 +94,15 @@ The tree is stored as a JavaScript object where every NODE contains:
 For example:
 
 dot: {
+
     letter: 'E',
+
     dot: {
+
         letter: 'I'
+
     }
+    
 }
 
 This represents: 
@@ -110,9 +115,11 @@ A null child means that there is no valid path in that direction!
 
 ## How to run It
 
-I'm trying to make a Live version, but for the mean time:
+Live version:
+[walrusmorse.devlucas.page](https://walrusmorse.devlucas.page/)
 
-Run it locally! -> 
+Or run it locally:
+
 1. Clone or download this repository
 2. Open `index.html` in a browser
 
@@ -133,7 +140,6 @@ References:
 - [dev.to](https://dev.to/)
 - [geeksforgeeks.org](https://www.geeksforgeeks.org/)
 - [cssgradient.io](https://cssgradient.io/)
-
 
 
 
