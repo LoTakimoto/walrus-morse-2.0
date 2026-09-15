@@ -3,9 +3,9 @@
 // null means that path doesnt lead to a letter 
  
 const morseTree = { 
-  dot: { // E 
+  dot: {
     letter: 'E', 
-    dot: { // I 
+    dot: { 
       letter: 'I', 
       dot: { letter: 'S', dot: { letter: 'H' }, dash: { letter: 'V' } }, 
       dash: { letter: 'U', dot: { letter: 'F' }, dash: null } 
@@ -41,34 +41,51 @@ const treeLines = []; // {x1, y1, x2, y2, type} for every connecting segment
 const COL_SPACING = 66; // horizontal dist.  
 const ROW_SPACING = 76; // vertical dista.when a branch drops down 
  
-function buildOrthogonalLayout(node, x, y, side) { 
-    if (!node) { 
-        return; // no letter down this path 
-    } 
- 
-    treeNodes.push({ x: x, y: y, letter: node.letter }); 
- 
-    const horizontalSymbol = side === 'right' ? 'dot' : 'dash'; 
-    const verticalSymbol = side === 'right' ? 'dash' : 'dot'; 
-    const horizontalSign = side === 'right' ? 1 : -1; 
- 
-    const horizontalChild = node[horizontalSymbol]; 
-    const verticalChild = node[verticalSymbol]; 
- 
-    if (horizontalChild) { 
-        const childX = x + horizontalSign * COL_SPACING; 
-        const childY = y; 
-        treeLines.push({ x1: x, y1: y, x2: childX, y2: childY, type: horizontalSymbol }); 
-        buildOrthogonalLayout(horizontalChild, childX, childY, side); 
-    } 
- 
-    if (verticalChild) { 
-        const childX = x; 
-        const childY = y + ROW_SPACING; 
-        treeLines.push({ x1: x, y1: y, x2: childX, y2: childY, type: verticalSymbol }); 
-        buildOrthogonalLayout(verticalChild, childX, childY, side); 
-    } 
-} 
+const MIN_NODE_SEPARATION = 42;
+
+function isTooClose(x, y) {
+    for (let i = 0; i < treeNodes.length; i++) {
+        const dx = treeNodes[i].x - x;
+        const dy = treeNodes[i].y - y;
+        if (Math.sqrt(dx * dx + dy * dy) < MIN_NODE_SEPARATION) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function buildOrthogonalLayout(node, x, y, horizontalSymbol, horizontalSign) {
+    if (!node) {
+        return;
+    }
+
+    treeNodes.push({x: x, y: y, letter: node.letter});
+
+    const verticalSymbol = horizontalSymbol === 'dot' ? 'dash' : 'dot';
+
+    const horizontalChild = node[horizontalSymbol];
+    const verticalChild = node[verticalSymbol];
+
+    if (horizontalChild) {
+        let childX = x + horizontalSign * COL_SPACING;
+        let childY = y;
+        while (isTooClose(childX, childY)) {
+            childY += ROW_SPACING;
+        }
+        treeLines.push({ x1: x, y1: y, x2: childX, y2: childY, type: horizontalSymbol });
+        buildOrthogonalLayout(horizontalChild, childX, childY, horizontalSymbol, horizontalSign);
+    }
+
+    if (verticalChild) {
+        let childX = x;
+        let childY = y + ROW_SPACING;
+        while (isTooClose(childX, childY)) {
+            childY += ROW_SPACING;
+        }
+        treeLines.push({ x1: x, y1: y, x2: childX, y2: childY, type: verticalSymbol });
+        buildOrthogonalLayout(verticalChild, childX, childY, horizontalSymbol, horizontalSign);
+    }
+}
  
 // -------- 
 // TURNING ALL THOSE POSITIONS INTO ACTUAL ELEMENTS on the page 
@@ -118,16 +135,16 @@ function drawTree() {
     const rootY = 30; 
     const spineY = rootY + 55; // E and T sit diagonal 
  
-    const eX = rootX + COL_SPACING; 
-    const tX = rootX - COL_SPACING; 
+    const eX = rootX - COL_SPACING; 
+    const tX = rootX + COL_SPACING; 
  
      
     // funnel shape at the top 
     treeLines.push({ x1: rootX, y1: rootY, x2: eX, y2: spineY, type: 'dot' }); 
     treeLines.push({ x1: rootX, y1: rootY, x2: tX, y2: spineY, type: 'dash' }); 
  
-    buildOrthogonalLayout(morseTree.dot, eX, spineY, 'right'); 
-    buildOrthogonalLayout(morseTree.dash, tX, spineY, 'left'); 
+    buildOrthogonalLayout(morseTree.dot, eX, spineY, 'dot', -1, 0); 
+    buildOrthogonalLayout(morseTree.dash, tX, spineY, 'dash', 1, 0); 
  
     // connecting lines firstr 
     for (let i = 0; i < treeLines.length; i++) { 
