@@ -243,11 +243,6 @@ function handlePressEnd() {
     updateDisplays(); 
     scheduleAutoCommit();
 } 
-
-
-
-
-
  
 function decodeSequence(sequence) { 
     let node = morseTree; 
@@ -318,11 +313,15 @@ function clearSequence() {
     updateSentenceDisplay(); 
 } 
  
-function backspaceSequence() { 
-    currentSequence.pop(); 
-    //removes the last entry (if any) 
-    updateDisplays(); 
-} 
+function backspaceSequence() {
+    if (currentSequence.length > 0) {
+        currentSequence.pop();
+        updateDisplays();
+    } else {
+        sentence = sentence.slice(0, -1);
+        updateSentenceDisplay();
+    }
+}
  
 // mouse/touch 
 morseKeyButton.addEventListener('pointerdown', handlePressStart); 
@@ -338,8 +337,13 @@ document.addEventListener('keydown', function (event) {
         if (!event.repeat) { 
             handlePressStart(); 
         } 
-    } 
-}); 
+    }
+
+    if (event.code === 'Backspace') {
+        event.preventDefault();
+        backspaceSequence();
+    }
+});
   
 document.addEventListener('keyup', function (event) { 
     if (event.code === 'Space') { 
