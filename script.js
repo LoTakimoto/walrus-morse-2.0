@@ -54,12 +54,17 @@ function isTooClose(x, y) {
     return false;
 }
 
-function buildOrthogonalLayout(node, x, y, horizontalSymbol, horizontalSign) {
+function buildOrthogonalLayout(node, x, y, horizontalSymbol, horizontalSign, sequence = '') {
     if (!node) {
         return;
     }
 
-    treeNodes.push({x: x, y: y, letter: node.letter});
+    treeNodes.push({
+        x: x,
+        y: y,
+        letter: node.letter,
+        sequence: sequence
+    });
 
     const verticalSymbol = horizontalSymbol === 'dot' ? 'dash' : 'dot';
 
@@ -69,21 +74,55 @@ function buildOrthogonalLayout(node, x, y, horizontalSymbol, horizontalSign) {
     if (horizontalChild) {
         let childX = x + horizontalSign * COL_SPACING;
         let childY = y;
+
         while (isTooClose(childX, childY)) {
             childY += ROW_SPACING;
         }
-        treeLines.push({ x1: x, y1: y, x2: childX, y2: childY, type: horizontalSymbol });
-        buildOrthogonalLayout(horizontalChild, childX, childY, horizontalSymbol, horizontalSign);
+
+        treeLines.push({
+            x1: x,
+            y1: y,
+            x2: childX,
+            y2: childY,
+            type: horizontalSymbol,
+            sequence: sequence + horizontalSymbol
+        });
+
+        buildOrthogonalLayout(
+            horizontalChild,
+            childX,
+            childY,
+            horizontalSymbol,
+            horizontalSign,
+            sequence + horizontalSymbol
+        );
     }
 
     if (verticalChild) {
         let childX = x;
         let childY = y + ROW_SPACING;
+
         while (isTooClose(childX, childY)) {
             childY += ROW_SPACING;
         }
-        treeLines.push({ x1: x, y1: y, x2: childX, y2: childY, type: verticalSymbol });
-        buildOrthogonalLayout(verticalChild, childX, childY, horizontalSymbol, horizontalSign);
+
+        treeLines.push({
+            x1: x,
+            y1: y,
+            x2: childX,
+            y2: childY,
+            type: verticalSymbol,
+            sequence: sequence + verticalSymbol
+        });
+
+        buildOrthogonalLayout(
+            verticalChild,
+            childX,
+            childY,
+            horizontalSymbol,
+            horizontalSign,
+            sequence + verticalSymbol
+        );
     }
 }
  
@@ -143,8 +182,8 @@ function drawTree() {
     treeLines.push({ x1: rootX, y1: rootY, x2: eX, y2: spineY, type: 'dot' }); 
     treeLines.push({ x1: rootX, y1: rootY, x2: tX, y2: spineY, type: 'dash' }); 
  
-    buildOrthogonalLayout(morseTree.dot, eX, spineY, 'dot', -1, 0); 
-    buildOrthogonalLayout(morseTree.dash, tX, spineY, 'dash', 1, 0); 
+    buildOrthogonalLayout(morseTree.dot, eX, spineY, 'dot', -1, 'dot'); 
+    buildOrthogonalLayout(morseTree.dash, tX, spineY, 'dash', 1, 'dash');
  
     // connecting lines firstr 
     for (let i = 0; i < treeLines.length; i++) { 
@@ -258,16 +297,46 @@ function decodeSequence(sequence) {
 } 
  
 function updateDisplays() { 
-    // top half: thecode typed as . and - symbols 
     const symbols = currentSequence.map(function (signal) { 
         return signal === 'dot' ? '.' : '-'; 
     }); 
+
     keyCodeDisplay.textContent = symbols.join(' '); 
   
-    // bottom half: what that code translates to 
     const decodedLetter = decodeSequence(currentSequence); 
-    keyLetterDisplay.textContent = decodedLetter || (currentSequence.length ? '?' : ''); 
-} 
+    keyLetterDisplay.textContent = decodedLetter || (currentSequence.length ? '?' : '');
+
+    updateTreePath();
+}
+function updateTreePath() {
+    const lines = document.querySelectorAll('.tree-line');
+    const pegs = document.querySelectorAll('.tree-peg');
+    const nodes = document.querySelectorAll('.tree-node');
+
+    const currentPath = currentSequence.join('');
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = treeLines[i];
+
+        if (currentPath.length > 0 && currentPath.startsWith(line.sequence)) {
+            lines[i].classList.add('active');
+            pegs[i].classList.add('active');
+        } else {
+            lines[i].classList.remove('active');
+            pegs[i].classList.remove('active');
+        }
+    }
+
+    for (let i = 0; i < nodes.length; i++) {
+        const node = treeNodes[i];
+
+        if (currentPath.length > 0 && node.sequence === currentPath) {
+            nodes[i].classList.add('active');
+        } else {
+            nodes[i].classList.remove('active');
+        }
+    }
+}
 
 function updateSentenceDisplay() {
     sentenceDisplay.textContent = sentence;
