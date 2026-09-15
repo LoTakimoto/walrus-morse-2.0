@@ -4,12 +4,16 @@
 
 After months of thinking about this project, thinking about the logic, imagining how I wanted it to work, and honesly being too lazy to actually start it, I finally decided to put my hands on it and make it!
 
-I originally tried to make this project in **Godot**.. and i failed miserably :D
+### walrus i drew a few months ago on @LucasHT22 's ipad :) (it says "W" in morse code on its back) -->
 
-I struggled with the logic (still am), couldn't really get the project working the way I wanted, got frustrated, and eventually gave up on it entirely. 
-After letting the idea sit in my head for a while, I decided to try again (this time as simpler and uglier web project)
+<img src="assets/walrus.png">
 
-<img src="assets/1.png">
+I originally tried to make this project in **Godot** and i failed miserably :D
+
+I struggled with the logic (still am), couldn't really get the project working the way I wanted, got mad, and eventually gave up on it entirely. 
+After letting the idea sit in my head for a while, I decided to try again (this time as a web project)
+
+
 
 ---
 

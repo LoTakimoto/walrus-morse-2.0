@@ -131,7 +131,7 @@ function drawTree() {
     treeNodes.length = 0; 
     treeLines.length = 0; 
  
-    const rootX = 660; 
+    const rootX = 450; 
     const rootY = 30; 
     const spineY = rootY + 55; // E and T sit diagonal 
  
