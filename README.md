@@ -52,7 +52,7 @@ You can **interact** with it in TWO ways:
 - **Click or hold the mouse**
 - **Press or hold the spacebar**
 
-<img src="assets/buttons.png>
+<img src="assets/buttons.png">
 
 The code measures how long the key was pressed:
 - A short press becomes a **DOT (`.`)**
@@ -76,7 +76,7 @@ This is done by walking through the same morseTree used to create the visual tre
 ## Editing the current code
 
 There are two buttons below the telegraph:
-- BACKSPACE (removes the last dot ot dash from the current sequence)
+- BACKSPACE (removes the last dot or dash from the current sequence)
 - CLEAR (Resets the current sequence)
 
 <img src="assets/sceba.png">
@@ -94,15 +94,10 @@ The tree is stored as a JavaScript object where every NODE contains:
 For example:
 
 dot: {
-
     letter: 'E',
-
     dot: {
-
         letter: 'I'
-
     }
-    
 }
 
 This represents: 
@@ -140,12 +135,4 @@ References:
 - [dev.to](https://dev.to/)
 - [geeksforgeeks.org](https://www.geeksforgeeks.org/)
 - [cssgradient.io](https://cssgradient.io/)
-
-
-
-
-
-
-
-
 
