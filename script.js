@@ -177,10 +177,20 @@ function drawTree() {
         nodeElement.style.top = node.y + 'px'; 
         nodeElement.textContent = node.letter; 
         treeArea.appendChild(nodeElement); 
-    } 
+    }
+
+    let maxY = rootY;
+
+    for (let i = 0; i < treeNodes.length; i++) {
+        if (treeNodes[i].y > maxY) {
+            maxY = treeNodes[i].y;
+        }
+    }
+
+    treeArea.style.height = (maxY + 40) + 'px';
 } 
- 
-drawTree(); 
+
+drawTree();
  
 //--------- 
 // keyboard 
@@ -190,12 +200,19 @@ drawTree();
 const DASH_THRESHOLD_MS = 200; 
 // holds shorter than this = dot / longer = dash 
  
-let pressStartTime = null; 
-let currentSequence = []; 
+const LETTER_PAUSE_MS = 1000;
+const WORD_PAUSE_MS = 2000;
+
+let pressStartTime = null;
+let currentSequence = [];
+let sentence = '';
+let letterTimeoutId = null;
+let spaceTimeoutId = null;
  
 const morseKeyButton = document.getElementById('morse-key'); 
 const keyCodeDisplay = document.getElementById('key-code-display'); 
 const keyLetterDisplay = document.getElementById('key-letter-display'); 
+const sentenceDisplay = document.getElementById('sentence-display');
  
 function handlePressStart() { 
     if (pressStartTime !== null) { 
@@ -203,7 +220,12 @@ function handlePressStart() {
     } 
     pressStartTime = Date.now(); 
     morseKeyButton.classList.add('active'); 
-} 
+
+    clearTimeout(letterTimeoutId);
+    clearTimeout(spaceTimeoutId);
+}
+
+
  
 function handlePressEnd() { 
     if (pressStartTime === null) { 
@@ -219,7 +241,13 @@ function handlePressEnd() {
     currentSequence.push(signal); 
   
     updateDisplays(); 
+    scheduleAutoCommit();
 } 
+
+
+
+
+
  
 function decodeSequence(sequence) { 
     let node = morseTree; 
@@ -245,10 +273,49 @@ function updateDisplays() {
     const decodedLetter = decodeSequence(currentSequence); 
     keyLetterDisplay.textContent = decodedLetter || (currentSequence.length ? '?' : ''); 
 } 
- 
+
+function updateSentenceDisplay() {
+    sentenceDisplay.textContent = sentence;
+}
+
+function commitLetterToSentence() {
+    if (currentSequence.length === 0) {
+        return;
+    }
+
+    const decodedLetter = decodeSequence(currentSequence);
+
+    sentence += decodedLetter || '?';
+    currentSequence = [];
+
+    updateDisplays();
+    updateSentenceDisplay();
+}
+
+function commitSpaceToSentence() {
+    if (sentence.length > 0 && sentence.charAt(sentence.length - 1) !== ' ') {
+        sentence += ' ';
+        updateSentenceDisplay();
+    }
+}
+
+function scheduleAutoCommit() {
+    clearTimeout(letterTimeoutId);
+    clearTimeout(spaceTimeoutId);
+
+    letterTimeoutId = setTimeout(commitLetterToSentence, LETTER_PAUSE_MS);
+    spaceTimeoutId = setTimeout(commitSpaceToSentence, WORD_PAUSE_MS);
+}
+
 function clearSequence() { 
     currentSequence = []; 
-    updateDisplays(); 
+    sentence = '';
+
+    clearTimeout(letterTimeoutId);
+    clearTimeout(spaceTimeoutId);
+
+    updateDisplays();
+    updateSentenceDisplay(); 
 } 
  
 function backspaceSequence() { 

@@ -8,31 +8,56 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    min-height: 100%;
+    min-height: 100vh;
     padding: 40px 20px;
     background: #f4f2ee;
-
 }
 
 #app-layout {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
-    gap: 32px;
+    align-items: stretch; /* left panel stretches to match the tree's height */
+    gap: 100px;
 }
 
 #left-panel {
+    display: flex;
+    flex-direction: column;
+    width: 420px;
+    flex-shrink: 0;
+}
+
+#sentence-display {
+    background: #1c1c1e;
+    border: 1px solid #444;
+    border-radius: 10px;
+    min-height: 100px;
+    padding: 16px;
+    color: #eae4d8;
+    font-size: 22px;
+    line-height: 1.5;
+    word-break: break-word;
+    overflow-y: auto;
+}
+
+/* pushes the key + buttons all the way down, so they line up with the
+   bottom of the tree on the right */
+#left-panel-bottom {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+#right-panel {
     flex: 1;
     min-width: 0;
 }
-
 
 #tree-area {
     position: relative;
     width: 900px;
     max-width: 100%;
-    height: 580px;
-    overflow: auto;
+    overflow: hidden; /* height is set in JS to exactly fit the tree, so this never needs to scroll */
     background: #1c1c1e;
 }
 
@@ -75,6 +100,8 @@ body {
     z-index: 1;
 }
 
+/* the metal peg sitting in the middle of each connection, marking
+   whether that step was a dot (short, round) or a dash (long, rectangular) */
 .tree-peg {
     position: absolute;
     background: linear-gradient(180deg, #6a6a6a, #2a2a2a 60%, #1a1a1a);
@@ -97,9 +124,8 @@ body {
 
 #morse-key {
     width: 100%;
-    margin-top: 0;
     background: #1c1c1e;
-    border: 1px solid #444 ;
+    border: 1px solid #444;
     border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
@@ -108,7 +134,7 @@ body {
     transition: background 0.08s ease;
 }
 
-/* while pressed */
+/* while pressed (mouse held or spacebar held) */
 #morse-key.active {
     background: #34343a;
 }
@@ -127,7 +153,7 @@ body {
 #key-letter-display {
     height: 100px;
     display: flex;
-    align-items: center ;
+    align-items: center;
     justify-content: center;
     font-size: 48px;
     font-weight: bold;
@@ -136,6 +162,28 @@ body {
 
 #keyboard {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     margin-top: 16px;
+}
+
+#keyboard button {
+    flex: 1;
+    padding: 12px 0;
+    background: #2a2a2e;
+    color: #eae4d8;
+    border: 1px solid #444;
+    border-radius: 8px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+#keyboard button:hover {
+    background: #3a3a40;
+}
+
+#keyboard button:active {
+    background: #4a4a52;
 }
