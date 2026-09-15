@@ -14,7 +14,6 @@ I struggled with the logic (still am), couldn't really get the project working t
 After letting the idea sit in my head for a while, I decided to try again (this time as a web project)
 
 
-
 ---
 
 This is an **interactive telegraph** with a **visual International Morse Code decoder**!
@@ -25,7 +24,7 @@ You can experience how a telegraph works and **visually** follow the code throug
 
 The project is built around a **Morse Code Tree**.
 
-<img src="assets/2.png">
+<img src="assets/decoder.png">
 
 Each letter in Morse code can be reached by following a path made of two possible signals:
 
@@ -53,7 +52,7 @@ You can **interact** with it in TWO ways:
 - **Click or hold the mouse**
 - **Press or hold the spacebar**
 
-<img src="assets/3.png">
+<img src="assets/buttons.png>
 
 The code measures how long the key was pressed:
 - A short press becomes a **DOT (`.`)**
@@ -80,7 +79,7 @@ There are two buttons below the telegraph:
 - BACKSPACE (removes the last dot ot dash from the current sequence)
 - CLEAR (Resets the current sequence)
 
-<img src="assets/4.png">
+<img src="assets/sceba.png">
 
 ---
 
@@ -119,7 +118,7 @@ Run it locally! ->
 
 No built steps, dependencies or installation required.
 
-<img src="assets/5.png">
+<img src="assets/index.png">
 
 ## Other
 
